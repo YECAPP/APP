@@ -1,0 +1,25 @@
+PROCEDURE NUEVOCLIENTE
+PARAMETERS xname
+	LOCAL lnNum,lcTres
+	lctres=UPPER(SUBSTR(XNAME,1,3))
+	XNAME=UPPER(XNAME)
+
+	SELECT;
+		IDCLIENTE AS TRES ;
+	FROM ;
+		CLIENTES  ;
+	WHERE ;
+		SUBSTR(IDCLIENTE,1,3)=SUBSTR(XNAME,1,3);
+	ORDER BY 1 ASC;
+	INTO cursor;
+		curtempclie
+	GO BOTTOM 
+
+	IF RECCOUNT("curtempclie")>0
+		lnNum=VAL(SUBSTR(curtempclie.TRES,5,3))+1
+	ELSE 
+		lnNum=0
+	ENDIF 
+	RETURN lctres+"-"+PADL(alltrim(STR(lnNum)),3,"0")
+	
+ENDPROC

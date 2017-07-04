@@ -1,0 +1,7 @@
+PROCEDURE NumeroOrden
+	SELECT NVL(MAX(NORDEN),"0") AS Num  FROM Ordencompra INTO CURSOR mex
+	*MESSAGEBOX(PADL(ALLTRIM(STR(VAL(mex.num)+1)),10,"0"))
+	RETURN PADL(ALLTRIM(STR(VAL(mex.num)+1)),10,"0")  
+	*NumeroOrden=VAL(norden)
+	*RETURN PADL(ALLTRIM(STR(NumeroOrden+1)),10,"0")
+ENDPROC 

@@ -1,0 +1,46 @@
+LOCAL lnCountScsUpdated,lnCountCnsUpdated
+lnCountScsUpdated=0
+lnCountCnsUpdated=0
+
+
+**18 FEB 2014 ACTUALIZANDO ESTADO DE SUCURSALES, EXISTIA EL PROBLEMA QUE SI EL CONTRATO ESTABA INACTIVO LAS SUCURSALES 
+**SEGUIAN ESTANDO ACTIVOS, SE CORRIGIO EN FEB 2014 HACIENDO QUE EN EL FORMULARIO CONTRATOS.SCX AL MOMENTO DE ELIMINAR 
+**UN CONTRATO LE PUSIERA ESTADO 2(INACTIVO ) A TODOS LAS SUCURSALES DEL CONTRATO 
+UPDATE MSUCURSAL SET ESTADO=0 WHERE IDCONTRATO IN (SELE IDCONTRATO FROM MCONTRATO WHERE ESTADO=0 )
+
+**04 ABR 2016 SE ACTUALIZÓ QUE LE PONGA VALOR UNO EN CANTIDAD PARA AQUELLOS EQUIPOS QUE TIENEN PRECIO Y TIENEN CERO EN CANTIDAD,
+**ESTO SE,AÑADIO A PARTIR DE QUE TACTICAL NECESITABA CREAR EL SKILL DE LA FACTURA AUN SIN EQUIPOS DENTRO DEL CONTRATO
+UPDATE MCONTRATO_EQ SET CANTIDAD=1 WHERE CANTIDAD=0 AND !EMPTY(PRECIO)
+**FIN 04 ABR 2016 
+
+
+SELECT idsucursal, SUM(CANTIDAD*precio) FROM MCONTRATO_EQ GROUP BY 1 INTO ARRAY laEqs
+IF !VARTYPE(laEqs)="X"
+	FOR lnEq= 1 TO ALEN(laEqs,1)
+		lnMonto=laEqs(lnEq,2)
+		lcSucursal=laEqs(lnEq,1)
+		UPDATE MSUCURSAL SET monto=lnMonto WHERE idsucursal=lcSucursal 
+		WAIT "Actualizando sucursal: "+lcSucursal WINDOW NOWAIT 
+		lnCountScsUpdated = lnCountScsUpdated + 1 
+	ENDFOR 
+	WAIT TRANSFORM(lnCountScsUpdated )+"Actualizadas con éxito" WINDOW NOWAIT 
+ENDIF 
+
+SELECT idcontrato, SUM(monto) FROM msucursal WHERE ESTADO<>0 GROUP BY 1 INTO ARRAY laScs
+IF !VARTYPE(laScs)="X"
+	FOR lnSc= 1 TO ALEN(laScs,1)
+		lnMonto=laScs(lnSc,2)
+		lcContrato=laScs(lnSc,1)
+		UPDATE MCONTRATO SET precio=lnMonto WHERE idcontrato=lcContrato
+		WAIT "Actualizando Contrato: "+lcContrato WINDOW NOWAIT 
+		lnCountCnsUpdated = lnCountCnsUpdated + 1 
+	ENDFOR 
+	WAIT TRANSFORM(lnCountCnsUpdated)+"Actualizadas con éxito" WINDOW NOWAIT 	
+ENDIF 
+WAIT "Actualizacion finalizada " WINDOW NOWAIT 	
+lcMsg=	"Precio de contratos actualizado con éxito"+CHR(13)+;
+		TRANSFORM(lnCountScsUpdated)+" Sucursales actualizadas"+CHR(13)+;
+		TRANSFORM(lnCountCnsUpdated)+" Contratos actualizados"
+		
+
+MESSAGEBOX(lcMsg,48,"Informe de Actualización")

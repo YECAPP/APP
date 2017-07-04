@@ -1,0 +1,26 @@
+PROCEDURE NUEVOPROVEEDOR 
+PARAMETERS XNAME
+	LOCAL lnNum,lcTres
+	lctres=UPPER(SUBSTR(XNAME,1,3))
+	XNAME=UPPER(XNAME)
+	SELECT;
+		IDPROV AS TRES ;
+	FROM ;
+		PROVEEDORES ;
+	WHERE ;
+		SUBSTR(IDPROV,1,3)=SUBSTR(XNAME,1,3);
+	ORDER BY 1 ASC;
+	INTO CURSOR;
+		curtmpprov
+	GO BOTTOM 
+	
+	IF RECCOUNT("curtmpprov")>0
+		lnNum=VAL(SUBSTR(curtmpprov.TRES,4,2))+1
+	ELSE 
+		lnNum=0
+	ENDIF 
+	
+	MESSAGEBOX(lctres+PADL(alltrim(STR(lnNum)),2,"0"))
+	RETURN lctres+PADL(alltrim(STR(lnNum)),2,"0")
+ENDPROC
+
